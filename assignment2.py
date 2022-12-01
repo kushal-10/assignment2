@@ -36,9 +36,11 @@ def main():
     #         1) Convert the sentences and intent to matrices using
     #         `bag_of_words_matrix()` and `labels_matrix()`.
     #         2) Initiallize the model Class with the appropriate parameters
-    X = None
+
+    X = np.array(bag_of_words_matrix(sentences))
     Y = None
     model = None
+    print(X.shape)
     ##################################################################
 
     if not args.minibatch:
@@ -51,3 +53,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+    '''
+    QUESTIONS
+    1 - BOW MATRIX - 1 AND 0s for every word occurence in data, like one hot encoding?
+    2 - UNK COUNT UPDATE AFTER VxM OR BEFORE?
+    '''
