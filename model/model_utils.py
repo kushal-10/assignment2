@@ -82,7 +82,20 @@ def labels_matrix(data: Tuple[List[str], Set[str]]) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    return None
+    intent_list = data[0]
+    unique = data[1]
+    unique = list(unique)
+
+    Y = np.zeros((len(unique), len(intent_list)))
+
+    # CREATING Y MATRIX OF SIZE KxM
+    for i in range(len(intent_list)):
+        for check in unique:
+            if intent_list[i] == check:
+                index_uni = unique.index(check)
+                Y[index_uni][i] = 1
+
+    return Y
     #########################################################################
 
 
@@ -92,7 +105,14 @@ def softmax(z: npt.ArrayLike) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    return None
+    Z1 = np.exp(z)
+    summation = np.sum(Z1, axis=0)
+
+    for j in range(len(Z1[0])):
+        for i in range(len(Z1)):
+            Z1[i][j] = Z1[i][j] / summation[j]
+
+    return Z1
     #########################################################################
 
 
@@ -102,7 +122,13 @@ def relu(z: npt.ArrayLike) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    return None
+    Z2 = z
+    for i in range(len(Z2)):
+        for j in range(len(Z2[0])):
+            if Z2[i][j] < 0:
+                Z2[i][j] = 0
+
+    return Z2
     #########################################################################
 
 
@@ -112,5 +138,13 @@ def relu_prime(z: npt.ArrayLike) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    return None
+    Z3 = z
+    for i in range(len(Z3)):
+        for j in range(len(Z3[0])):
+            if Z3[i][j] < 0:
+                Z3[i][j] = 0
+            else:
+                Z3[i][j] = 1
+
+    return Z3
     #########################################################################

@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 
 from utils import load_dataset
-from model.model_utils import bag_of_words_matrix, labels_matrix
+from model.model_utils import bag_of_words_matrix, labels_matrix, softmax, relu, relu_prime
 from model.ffnn import NeuralNetwork
 from helper import batch_train, minibatch_train
 
@@ -38,9 +38,10 @@ def main():
     #         2) Initiallize the model Class with the appropriate parameters
 
     X = np.array(bag_of_words_matrix(sentences))
-    Y = None
+    Y = np.array(labels_matrix((intent, unique_intent)))
+
     model = None
-    print(X.shape)
+
     ##################################################################
 
     if not args.minibatch:
@@ -55,6 +56,9 @@ if __name__ == "__main__":
     main()
     '''
     QUESTIONS
-    1 - BOW MATRIX - 1 AND 0s for every word occurence in data, like one hot encoding?
-    2 - UNK COUNT UPDATE AFTER VxM OR BEFORE?
+    1 - BOW MATRIX/L Matrix - 1 AND 0s for every word occurrence in data, like one hot encoding?
+    2 - UNK COUNT UPDATE AFTER VxM OR BEFORE? UNK tokens counted in vocab or not
+    
+    A - is order of Y matrix important?
+    B - cant use relu/prime together?
     '''
