@@ -14,7 +14,18 @@ def batch_train(X, Y, model, train_flag=False):
     #         intent and calculate the accuracy of the classifier
     #         3) Then, plot the cost function for each iteration and
     #         compare the results after training with results before training
-    pass
+
+    Yhat = model.predict(X)
+    data_size = len(X[0])
+    correct = 0
+    for i in range(len(Y)):
+        for j in range(len(Y[0])):
+            if Yhat[i][j] == 1 and Y[i][j] == 1:
+                correct += 1
+
+    accuracy = float(correct)/data_size
+    print("Accuracy : " + str(accuracy))
+
     if train_flag:
         pass
     ###############################################################################

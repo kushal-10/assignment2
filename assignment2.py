@@ -40,8 +40,9 @@ def main():
     X = np.array(bag_of_words_matrix(sentences))
     Y = np.array(labels_matrix((intent, unique_intent)))
 
-    model = None
-
+    model = NeuralNetwork(input_size=len(X), hidden_size=150, num_classes=len(Y))
+    # yhat = model.predict(X)
+    # print(yhat)
     ##################################################################
 
     if not args.minibatch:
