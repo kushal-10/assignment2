@@ -41,8 +41,6 @@ def main():
     Y = np.array(labels_matrix((intent, unique_intent)))
 
     model = NeuralNetwork(input_size=len(X), hidden_size=150, num_classes=len(Y))
-    # yhat = model.predict(X)
-    # print(yhat)
     ##################################################################
 
     if not args.minibatch:
@@ -59,6 +57,8 @@ if __name__ == "__main__":
     QUESTIONS
     1 - BOW MATRIX/L Matrix - 1 AND 0s for every word occurrence in data, like one hot encoding?
     2 - UNK COUNT UPDATE AFTER VxM OR BEFORE? UNK tokens counted in vocab or not
+    3 - Difference between U and W2
+    4 - any improvements using stochastic/batch GD
     
     A - is order of Y matrix important?
     B - cant use relu/prime together?

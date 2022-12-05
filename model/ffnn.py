@@ -4,14 +4,21 @@ import numpy.typing as npt
 from model.model_utils import softmax, relu, relu_prime
 from typing import Tuple
 
+Z1 = None
+Z2 = None
+A0 = None
+A1 = None
+A2 = None
+cc = 0
+
 
 class NeuralNetwork(object):
     def __init__(
-        self, 
-        input_size: int,
-        hidden_size: int, 
-        num_classes: int,
-        seed: int = 1
+            self,
+            input_size: int,
+            hidden_size: int,
+            num_classes: int,
+            seed: int = 1
     ):
         """
         Initialize neural network's weights and biases.
@@ -23,8 +30,8 @@ class NeuralNetwork(object):
         #         2) Initialize weight matrices and biases with uniform
         #         distribution in the range (-1, 1).
         np.random.seed(seed)
-        self.W1 = np.random.uniform(-1, 1, (hidden_size, input_size+1))
-        self.W2 = np.random.uniform(-1, 1, (num_classes, hidden_size+1))
+        self.W1 = np.random.uniform(-1, 1, (hidden_size, input_size))
+        self.W2 = np.random.uniform(-1, 1, (num_classes, hidden_size))
         self.b1 = np.random.uniform(-1, 1)
         self.b2 = np.random.uniform(-1, 1)
         pass
@@ -41,25 +48,25 @@ class NeuralNetwork(object):
         #         1) Perform only a forward pass with X as input.
 
         # ADDING X0 TERM (BIAS TERM) IN X MATRIX
-        A0 = np.ones((1, len(X[0])))
-        A0 = A0 * self.b1
-        for i in range(len(X)):
-            A0 = np.vstack((A0, np.array(X[i])))
+        global A0, A1, A2, Z1, Z2
 
-        # CALCULATING Z1 = W1 * A0
-        Z1 = np.dot(self.W1, A0)
+        A0 = X
 
-        # ACTIVATION FUNCTION
-        A1_temp = relu(Z1)
+        A0_add = np.ones((1, len(A0[0]))) * self.b1
+        W1_add = np.ones((len(self.W1), 1)) * self.b1
+        A0_temp = np.vstack((A0, A0_add))
+        W1_temp = np.hstack((self.W1, W1_add))
 
-        # ADDING X0 TERM (BIAS TERM) IN A1_temp
-        A1 = np.ones((1, len(A1_temp[0])))
-        A1 = A1 * self.b2
-        for i in range(len(A1_temp)):
-            A1 = np.vstack((A1, np.array(A1_temp[i])))
+        Z1 = np.dot(W1_temp, A0_temp)
+        A1 = relu(Z1)
 
-        # CALCULATING Z2 = W2 * A1
-        Z2 = np.dot(self.W2, A1)
+        A1_add = np.ones((1, len(A1[0]))) * self.b2
+        W2_add = np.ones((len(self.W2), 1)) * self.b2
+        A1_temp = np.vstack((A1, A1_add))
+        W2_temp = np.hstack((self.W2, W2_add))
+
+        Z2 = np.dot(W2_temp, A1_temp)
+        A2 = relu(Z2)
 
         # ACTIVATION FUNCTION
         Yhat = softmax(Z2)
@@ -96,9 +103,9 @@ class NeuralNetwork(object):
         ######################################################################
 
     def backward(
-        self, 
-        X: npt.ArrayLike, 
-        Y: npt.ArrayLike
+            self,
+            X: npt.ArrayLike,
+            Y: npt.ArrayLike
     ) -> Tuple[npt.ArrayLike, npt.ArrayLike, npt.ArrayLike, npt.ArrayLike]:
         """
         Backpropagation algorithm.
@@ -109,7 +116,20 @@ class NeuralNetwork(object):
         #         1) Perform forward pass, then backpropagation
         #         to get gradient for weight matrices and biases
         #         2) Return the gradient for weight matrices and biases
-        pass
+        yhat = self.predict(X)
+        del_L = np.subtract(yhat, Y)
+
+        global Z1, Z2, A0, A1, A2, cc
+
+        del_1 = np.dot(np.transpose(self.W2), relu_prime(Z2) * del_L)
+        del_0 = np.dot(np.transpose(self.W1), relu_prime(Z1) * del_1)
+
+        W1_gradient = np.dot(del_1, np.transpose(A0))
+        W2_gradient = np.dot(del_L, np.transpose(A1))
+        b1_gradient = np.average(del_1)
+        b2_gradient = np.average(del_L)
+
+        return W1_gradient, W2_gradient, b1_gradient, b2_gradient
         #######################################################################
 
 
@@ -122,5 +142,13 @@ def compute_loss(pred: npt.ArrayLike, truth: npt.ArrayLike) -> float:
     #     TODO:
     #         1) Compute the cross entropy loss between your model prediction
     #         and the ground truth.
-    pass
+    Loss = []
+    for j in range(len(pred[0])):
+        Li = 0
+        for i in range(len(pred)):
+            Li -= truth[i][j] * np.log(pred[i][j])
+        Loss.append(Li)
+
+    loss = np.average(Loss)
+    return loss
     #######################################################################
