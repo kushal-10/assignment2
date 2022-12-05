@@ -6,6 +6,7 @@ from model.model_utils import bag_of_words_matrix, labels_matrix, softmax, relu,
 from model.ffnn import NeuralNetwork
 from helper import batch_train, minibatch_train
 
+
 DATA_PATH = './data/dataset.csv'
 
 
@@ -62,4 +63,6 @@ if __name__ == "__main__":
     
     A - is order of Y matrix important?
     B - cant use relu/prime together?
+    
+    -Representation Learning
     '''
