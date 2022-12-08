@@ -4,12 +4,7 @@ import numpy.typing as npt
 from model.model_utils import softmax, relu, relu_prime
 from typing import Tuple
 
-Z1 = None
-Z2 = None
-A0 = None
-A1 = None
-A2 = None
-cc = 0
+
 
 
 class NeuralNetwork(object):
@@ -34,6 +29,12 @@ class NeuralNetwork(object):
         self.W2 = np.random.uniform(-1, 1, (num_classes, hidden_size))
         self.b1 = np.random.uniform(-1, 1)
         self.b2 = np.random.uniform(-1, 1)
+        self.Z1 = None
+        self.Z2 = None
+        self.A0 = None
+        self.A1 = None
+        self.A2 = None
+        self.cc = 0
         pass
         ###################################################################
 
@@ -48,28 +49,27 @@ class NeuralNetwork(object):
         #         1) Perform only a forward pass with X as input.
 
         # ADDING X0 TERM (BIAS TERM) IN X MATRIX
-        global A0, A1, A2, Z1, Z2
 
-        A0 = X
+        self.A0 = X
 
-        A0_add = np.ones((1, len(A0[0]))) * self.b1
+        A0_add = np.ones((1, len(self.A0[0]))) * self.b1
         W1_add = np.ones((len(self.W1), 1)) * self.b1
-        A0_temp = np.vstack((A0, A0_add))
+        A0_temp = np.vstack((self.A0, A0_add))
         W1_temp = np.hstack((self.W1, W1_add))
 
-        Z1 = np.dot(W1_temp, A0_temp)
-        A1 = relu(Z1)
+        self.Z1 = np.dot(W1_temp, A0_temp)
+        self.A1 = relu(self.Z1)
 
-        A1_add = np.ones((1, len(A1[0]))) * self.b2
+        A1_add = np.ones((1, len(self.A1[0]))) * self.b2
         W2_add = np.ones((len(self.W2), 1)) * self.b2
-        A1_temp = np.vstack((A1, A1_add))
+        A1_temp = np.vstack((self.A1, A1_add))
         W2_temp = np.hstack((self.W2, W2_add))
 
-        Z2 = np.dot(W2_temp, A1_temp)
-        A2 = relu(Z2)
+        self.Z2 = np.dot(W2_temp, A1_temp)
+        self.A2 = softmax(self.Z2)
 
         # ACTIVATION FUNCTION
-        Yhat = softmax(Z2)
+        Yhat = self.A2
 
         return Yhat
         #####################################################################
@@ -119,13 +119,11 @@ class NeuralNetwork(object):
         yhat = self.predict(X)
         del_L = np.subtract(yhat, Y)
 
-        global Z1, Z2, A0, A1, A2, cc
+        del_1 = np.dot(np.transpose(self.W2), relu_prime(self.Z2) * del_L)
+        del_0 = np.dot(np.transpose(self.W1), relu_prime(self.Z1) * del_1)
 
-        del_1 = np.dot(np.transpose(self.W2), relu_prime(Z2) * del_L)
-        del_0 = np.dot(np.transpose(self.W1), relu_prime(Z1) * del_1)
-
-        W1_gradient = np.dot(del_1, np.transpose(A0))
-        W2_gradient = np.dot(del_L, np.transpose(A1))
+        W1_gradient = np.dot(del_1, np.transpose(self.A0))
+        W2_gradient = np.dot(del_L, np.transpose(self.A1))
         b1_gradient = np.average(del_1)
         b2_gradient = np.average(del_L)
 
