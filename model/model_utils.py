@@ -105,14 +105,23 @@ def softmax(z: npt.ArrayLike) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    Z1 = np.exp(z)
-    summation = np.sum(Z1, axis=0)
+    # CONVERT ALL INPUT TYPES (MATRIX OR ARRAY) TO ARRAY
+    X = np.array(z)
 
-    for j in range(len(Z1[0])):
-        for i in range(len(Z1)):
-            Z1[i][j] = Z1[i][j] / summation[j]
+    # CHECK IF INPUT HAS A SINGLE ROW OR MULTI ROWS
+    if len(np.shape(X)) == 1 or np.shape(X)[0] == 1:
+        X = np.exp(X)
+        summation = np.sum(X)
+        X = X / summation
+    else:
+        X = np.exp(X)
+        summation = np.sum(X, axis=0)
 
-    return Z1
+        for j in range(len(X[0])):
+            for i in range(len(X)):
+                X[i][j] = X[i][j] / summation[j]
+
+    return X
     #########################################################################
 
 
@@ -122,13 +131,20 @@ def relu(z: npt.ArrayLike) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    Z2 = z
-    for i in range(len(Z2)):
-        for j in range(len(Z2[0])):
-            if Z2[i][j] < 0:
-                Z2[i][j] = 0
+    Z = np.array(z)
 
-    return Z2
+    # CHECK IF INPUT IS A SINGLE ROW ARRAY
+    if len(np.shape(Z)) == 1:
+        for i in range(len(Z)):
+            if Z[i] < 0:
+                Z[i] = 0
+    else:
+        for i in range(len(Z)):
+            for j in range(len(Z[0])):
+                if Z[i][j] < 0:
+                    Z[i][j] = 0
+
+    return Z
     #########################################################################
 
 
@@ -138,13 +154,22 @@ def relu_prime(z: npt.ArrayLike) -> npt.ArrayLike:
     """
     ############################# STUDENT SOLUTION ##########################
     # YOUR CODE HERE
-    Z3 = z
-    for i in range(len(Z3)):
-        for j in range(len(Z3[0])):
-            if Z3[i][j] < 0:
-                Z3[i][j] = 0
-            else:
-                Z3[i][j] = 1
+    Z = np.array(z)
 
-    return Z3
+    # CHECK IF INPUT IS A SINGLE ROW ARRAY
+    if len(np.shape(Z)) == 1:
+        for i in range(len(Z)):
+            if Z[i] < 0:
+                Z[i] = 0
+            else:
+                Z[i] = 1
+    else:
+        for i in range(len(Z)):
+            for j in range(len(Z[0])):
+                if Z[i][j] < 0:
+                    Z[i][j] = 0
+                else:
+                    Z[i][j] = 1
+
+    return Z
     #########################################################################

@@ -17,47 +17,29 @@ def batch_train(X, Y, model, train_flag=False):
     #         3) Then, plot the cost function for each iteration and
     #         compare the results after training with results before training
 
-    Yhat = model.predict(X)
-    data_size = len(X[0])
-    correct = 0
-    correct2 = 0
-    for i in range(len(Y)):
-        for j in range(len(Y[0])):
-            if Yhat[i][j] == 1 and Y[i][j] == 1:
-                correct += 1
+    # PRINT INITIAL ACCURACY (WITHOUT TRAINING)
+    acc = get_accuracy(model, X, Y)
+    print("Initial Accuracy : " + str(acc))
 
-    accuracy = float(correct) / data_size
-    print("Initial Accuracy : " + str(accuracy))
-
+    # TRAINING THE MODEL
     if train_flag:
         learning_rate = 0.005
         cost = []
         for i in range(1000):
-            (del_W1, del_W2, del_b1, del_b2) = model.backward(X, Y)
-            model.W1 -= learning_rate * del_W1 / data_size
-            model.W2 -= learning_rate * del_W2 / data_size
-            model.b1 -= learning_rate * del_b1 / data_size
-            model.b2 -= learning_rate * del_b2 / data_size
+            # UPDATE THE WEIGHTS OF THE MODEL
+            update_weights(X, Y, model, learning_rate, len(X[0]))
 
+            # CALCULATE COST FOR EACH ITERATION AND STORE
             pred = model.forward(X)
-            loss = compute_loss(pred, Y)
-            cost.append(loss)
+            cost_temp = compute_loss(pred, Y)
+            cost.append(cost_temp)
 
-        Yhat_trained = model.predict(X)
-        for i in range(len(Y)):
-            for j in range(len(Y[0])):
-                if Yhat_trained[i][j] == 1 and Y[i][j] == 1:
-                    correct2 += 1
+        # PRINT THE ACCURACY AFTER TRAINING
+        accuracy = get_accuracy(model, X, Y)
+        print("Accuracy after training : " + str(accuracy))
 
-        accuracy2 = float(correct2) / data_size
-        print("Accuracy after training : " + str(accuracy2))
-
-        x_axis = np.arange(0, len(cost), 1)
-        plt.plot(x_axis, cost)
-        plt.xlabel("Iterations")
-        plt.ylabel("Cost per iteration")
-        plt.title("Cost v/s Iteration for Batch Training ")
-        plt.show()
+        # PLOT THE GRAPH OF COST V/S ITERATION
+        plot(cost, "Batch", "Cost")
 
     return None
     ###############################################################################
@@ -71,79 +53,96 @@ def minibatch_train(X, Y, model, train_flag=False):
     #         and SGD (batch size = 1) for 1000 epochs using learning rate
     #         = 0.005. Then, plot the cost vs iteration for both cases.
 
-    learning_rate = 0.005
-    # FOR BATCH TRAINING FOR 64
-    data_size = len(X[0])
-    batch_size = 64
-    indices = np.arange(batch_size, X.shape[1], batch_size)
-    X_batches = np.array_split(X, indices, axis=1)
-    Y_batches = np.array_split(Y, indices, axis=1)
+    # FOR MINI BATCH
+    # SPLIT DATA INTO BATCHES OF 64 EACH
+    X_batches, Y_batches = split_data(X, Y, batch_size=64)
 
-    cost_batch = []
-    for i in range(1000):
-        for j in range(len(X_batches)):
-            (del_W1, del_W2, del_b1, del_b2) = model.backward(X_batches[j], Y_batches[j])
-            model.W1 -= learning_rate * del_W1 / data_size
-            model.W2 -= learning_rate * del_W2 / data_size
-            model.b1 -= learning_rate * del_b1 / data_size
-            model.b2 -= learning_rate * del_b2 / data_size
+    # GET THE COST FOR EACH ITERATION WHILE UPDATING WEIGHTS
+    cost_minibatch = train_batches(X_batches, Y_batches, model, learning_rate=0.005)
 
-        pred_batch = model.forward(X)
-        loss_batch = compute_loss(pred_batch, Y)
-        cost_batch.append(loss_batch)
+    # PRINT THE ACCURACY AFTER TRAINING
+    accuracy = get_accuracy(model, X, Y)
+    print("Accuracy for minibatch : " + str(accuracy))
 
-    correct = 0
-    Yhat_batch = model.predict(X)
-    for i in range(len(Y)):
-        for j in range(len(Y[0])):
-            if Yhat_batch[i][j] == 1 and Y[i][j] == 1:
-                correct += 1
-    accuracy = float(correct) / data_size
-    print("Batch Training Accuracy : " + str(accuracy))
+    # FOR STOCHASTIC
+    # SPLIT DATA INTO BATCHES OF 1 EACH
+    X_batches, Y_batches = split_data(X, Y, batch_size=1)
 
-    # FOR STOCHASTIC GD
-    data_size = len(X[0])
-    batch_size = 1
-    indices = np.arange(batch_size, X.shape[1], batch_size)
-    X_batches = np.array_split(X, indices, axis=1)
-    Y_batches = np.array_split(Y, indices, axis=1)
-    # print(len(X_batches))
+    # GET THE COST FOR EACH ITERATION WHILE UPDATING WEIGHTS
+    cost_stochastic = train_batches(X_batches, Y_batches, model, learning_rate=0.005)
 
-    cost_stochastic = []
-    for i in range(1000):
-        for j in range(len(X_batches)):
-            (del_W1, del_W2, del_b1, del_b2) = model.backward(X_batches[j], Y_batches[j])
-            model.W1 -= learning_rate * del_W1 / data_size
-            model.W2 -= learning_rate * del_W2 / data_size
-            model.b1 -= learning_rate * del_b1 / data_size
-            model.b2 -= learning_rate * del_b2 / data_size
+    # PRINT THE ACCURACY AFTER TRAINING
+    accuracy = get_accuracy(model, X, Y)
+    print("Accuracy for stochastic : " + str(accuracy))
 
-        pred_stochastic = model.forward(X)
-        loss_stochastic = compute_loss(pred_stochastic, Y)
-        cost_stochastic.append(loss_stochastic)
+    # PLOT THE GRAPH OF COST V/S EPOCH FOR MINIBATCH
+    plot(cost_minibatch, "Minibatch", "Cost")
 
-    correct = 0
-    Yhat_batch = model.predict(X)
-    for i in range(len(Y)):
-        for j in range(len(Y[0])):
-            if Yhat_batch[i][j] == 1 and Y[i][j] == 1:
-                correct += 1
-    accuracy = float(correct) / data_size
-    print("Stochastic Training Accuracy : " + str(accuracy))
-
-    x_axis_b = np.arange(0, len(cost_stochastic), 1)
-    plt.plot(x_axis_b, cost_stochastic)
-    plt.xlabel("Iterations")
-    plt.ylabel("Cost per iteration")
-    plt.title("Cost v/s Iteration for Mini Batch Gradient Descent ")
-    plt.show()
-
-    x_axis_s = np.arange(0, len(cost_batch), 1)
-    plt.plot(x_axis_s, cost_batch)
-    plt.xlabel("Iterations")
-    plt.ylabel("Cost per iteration")
-    plt.title("Cost v/s Iteration for Stochastic Gradient Descent ")
-    plt.show()
+    # PLOT THE GRAPH OF COST V/S EPOCH FOR STOCHASTIC
+    plot(cost_stochastic, "Stochastic", "Cost")
 
     return None
     #########################################################################
+
+
+def train_batches(X1, Y1, model, learning_rate):
+    cost_list = []
+    # TRAIN FOR 1000 EPOCHS
+    for i in range(1000):
+        # FOR INDIVIDUAL BATCH
+        for j in range(len(X1)):
+            # UPDATE THE WEIGHTS OF THE MODEL
+            update_weights(X1[j], Y1[j], model, learning_rate, len(X1[j][0]))
+
+            # CALCULATE COST FOR EACH ITERATION AND STORE
+            pred = model.forward(X1[j])
+            cost = compute_loss(pred, X1[j])
+            cost_list.append(cost)
+
+
+    return cost_list
+
+
+def update_weights(D, E, model, learning_rate, l):
+    # BACK PROPAGATE AND UPDATE THE WEIGHTS
+    (del_W1, del_W2, del_b1, del_b2) = model.backward(D, E)
+    model.W1 -= learning_rate * del_W1 / l
+    model.W2 -= learning_rate * del_W2 / l
+    model.b1 -= learning_rate * del_b1 / l
+    model.b2 -= learning_rate * del_b2 / l
+
+
+def get_accuracy(model, X, Y):
+    # GET THE ACCURACY OF MODEL GIVEN X AND Y
+    correct = 0
+    Yhat = model.predict(X)
+    for i in range(len(Y)):
+        for j in range(len(Y[0])):
+            if Yhat[i][j] == 1 and Y[i][j] == 1:
+                correct += 1
+    accuracy = float(correct) / len(Y[0])
+
+    return accuracy
+
+
+def split_data(M1, M2, batch_size):
+    # GET THE INDICES FOR SPLITTING
+    indices = np.arange(batch_size, M1.shape[1], batch_size)
+
+    # SPLITTING X(M1) AND Y(M2) MATRICES
+    M1_batches = np.array_split(M1, indices, axis=1)
+    M2_batches = np.array_split(M2, indices, axis=1)
+
+    return M1_batches, M2_batches
+
+
+def plot(cost, type, value):
+    # PLOTTING THE GRAPHS
+    x_axis = np.arange(0, len(cost), 1)
+    plt.plot(x_axis, cost)
+    plt.xlabel("Iterations")
+    plt.ylabel(value + " per iteration")
+    plt.title(value + " v/s Iteration for " + type)
+    plt.show()
+
+    return None

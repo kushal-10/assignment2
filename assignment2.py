@@ -2,10 +2,9 @@ import argparse
 import numpy as np
 
 from utils import load_dataset
-from model.model_utils import bag_of_words_matrix, labels_matrix, softmax, relu, relu_prime
+from model.model_utils import bag_of_words_matrix, labels_matrix
 from model.ffnn import NeuralNetwork
 from helper import batch_train, minibatch_train
-
 
 DATA_PATH = './data/dataset.csv'
 
@@ -41,7 +40,7 @@ def main():
     X = np.array(bag_of_words_matrix(sentences))
     Y = np.array(labels_matrix((intent, unique_intent)))
 
-    model = NeuralNetwork(input_size=len(X), hidden_size=150, num_classes=len(Y))
+    model = NeuralNetwork(input_size=len(X), hidden_size=150, num_classes=len(Y), seed=1)
     ##################################################################
 
     if not args.minibatch:
@@ -54,15 +53,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    '''
-    QUESTIONS
-    1 - BOW MATRIX/L Matrix - 1 AND 0s for every word occurrence in data, like one hot encoding?
-    2 - UNK COUNT UPDATE AFTER VxM OR BEFORE? UNK tokens counted in vocab or not
-    3 - Difference between U and W2
-    4 - any improvements using stochastic/batch GD
-    
-    A - is order of Y matrix important?
-    B - cant use relu/prime together?
-    
-    -Representation Learning
-    '''
